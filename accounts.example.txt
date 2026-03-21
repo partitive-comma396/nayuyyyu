@@ -1,0 +1,2 @@
+# 每行一个账号，格式: email@example.com|password
+# 复制为 accounts.txt 后填写真实信息（accounts.txt 已被 git 忽略）

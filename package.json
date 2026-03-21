@@ -1,0 +1,13 @@
+{
+  "name": "codex-api-manager",
+  "version": "1.0.0",
+  "description": "复制卡密，自动注册+激活+反代API",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "devDependencies": {
+    "node-pty": "^1.1.0"
+  }
+}

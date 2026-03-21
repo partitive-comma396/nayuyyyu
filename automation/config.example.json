@@ -1,0 +1,18 @@
+{
+  "quota_source_url": null,
+  "max_workers": 1,
+  "headless": false,
+  "slow_mo": 1200,
+  "timeout": 45000,
+  "password": null,
+  "proxy": null,
+  "anti_detect": {
+    "random_viewport": true,
+    "min_delay_ms": 800,
+    "max_delay_ms": 2500,
+    "between_accounts_min_s": 15,
+    "between_accounts_max_s": 35,
+    "batch_between_accounts_min_s": 45,
+    "batch_between_accounts_max_s": 120
+  }
+}

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex API Manager</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 { margin: 0 0 24px; font-size: 24px; color: #fff; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .card {
+      background: #16213e;
+      padding: 16px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .card .num { font-size: 28px; font-weight: 700; color: #00d9ff; }
+    .card .label { font-size: 12px; color: #8892b0; margin-top: 4px; }
+    .panel {
+      background: #16213e;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .panel h2 { margin: 0 0 16px; font-size: 16px; color: #00d9ff; }
+    .warn { background: #3d1a1a; border-left: 4px solid #e74c3c; padding: 12px; margin-bottom: 16px; border-radius: 0 8px 8px 0; }
+    .warn-title { color: #e74c3c; font-weight: 600; margin-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #2a2a4a; }
+    th { color: #8892b0; font-weight: 500; }
+    .status-ok { color: #2ecc71; }
+    .status-pending { color: #f1c40f; }
+    .status-error { color: #e74c3c; }
+    .days-warn { color: #e74c3c; }
+    .days-ok { color: #2ecc71; }
+    input, button {
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: 1px solid #2a2a4a;
+      background: #0f0f1a;
+      color: #eee;
+      font-size: 14px;
+    }
+    input { width: 100%; margin-bottom: 12px; }
+    input::placeholder { color: #666; }
+    button {
+      cursor: pointer;
+      background: #00d9ff;
+      color: #0f0f1a;
+      border: none;
+      font-weight: 600;
+      margin-right: 8px;
+      margin-top: 4px;
+    }
+    button:hover { background: #00b8d9; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.secondary { background: #2a2a4a; color: #eee; }
+    button.secondary:hover { background: #3a3a5a; }
+    .form-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px; }
+    .form-group { flex: 1; min-width: 180px; }
+    .form-group label { display: block; font-size: 12px; color: #8892b0; margin-bottom: 4px; }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background: #16213e;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      z-index: 1000;
+      animation: fadeIn 0.3s;
+    }
+    .toast.success { border-left: 4px solid #2ecc71; }
+    .toast.error { border-left: 4px solid #e74c3c; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .loading { opacity: 0.6; pointer-events: none; }
+    .copy-btn { padding: 4px 8px; font-size: 11px; margin-left: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Codex API Manager</h1>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:12px 16px;background:#0f0f1a;border-radius:8px;flex-wrap:wrap">
+      <span style="color:#8892b0">🔑 完整 API Key：</span>
+      <code id="apiKeyDisplay" style="font-size:14px;color:#00d9ff;letter-spacing:0.5px">加载中…</code>
+      <button class="copy-btn" onclick="copyApiKey()">复制</button>
+      <span style="color:#8892b0;font-size:13px" id="apiUrlDisplay">API: 加载中…</span>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <span style="color:#8892b0;font-size:13px">⚡ Fast Mode:</span>
+        <button id="fastModeBtn" onclick="toggleFastMode()" style="min-width:50px;padding:6px 14px;font-size:13px;font-weight:600">…</button>
+      </span>
+    </div>
+
+    <div class="cards">
+      <div class="card"><div class="num" id="total">0</div><div class="label">总账户数</div></div>
+      <div class="card"><div class="num" id="active">0</div><div class="label">已激活</div></div>
+      <div class="card"><div class="num" id="teamCount">0</div><div class="label">Team</div></div>
+      <div class="card"><div class="num" id="freeCount">0</div><div class="label">Free</div></div>
+      <div class="card"><div class="num" id="pending">0</div><div class="label">代激活</div></div>
+      <div class="card"><div class="num" id="dropped">0</div><div class="label">掉车</div></div>
+      <div class="card"><div class="num" id="expiring">0</div><div class="label">卡密将到期(7天内)</div></div>
+    </div>
+
+    <div id="expiry-warn"></div>
+
+    <div class="panel">
+      <h2>执行流水线</h2>
+      <p style="margin: 0 0 12px; color: #8892b0; font-size: 13px;">未激活：池中有空闲号（代激活）则直接用池中号兑换，否则注册新号。已激活且绑定邮箱在池中：质保后提取 Token。</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>卡密（如 ZB-XXXXXXXX）</label>
+          <input type="text" id="cardKey" placeholder="ZB-XXXXXXXX 或 卡密：ZB-XXX">
+        </div>
+        <div class="form-group">
+          <label>激活网址</label>
+          <input type="text" id="activationUrl" placeholder="team.654301.xyz" value="team.654301.xyz">
+        </div>
+        <button id="runPipeline" onclick="runPipeline()">执行流水线</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>掉车检测与质保</h2>
+      <p style="margin: 0 0 12px; color: #8892b0; font-size: 13px;">① 一键检测：实时用 gpt-5.4 xhigh 检测，掉车则尝试质保；无卡密或质保失败则移出账号池。状态栏已合并反代实时健康状态。</p>
+      <p style="margin: 0 0 12px; color: #8892b0; font-size: 13px;">💡 执行流水线时若卡密显示「已被使用」，程序会自动激活查询获取绑定邮箱，若该邮箱已在池中则直接提取 Token 回归正轨</p>
+      <p style="margin: 0 0 12px; color: #8892b0; font-size: 13px;">② 掉车账号一键质保：对已标记为掉车且绑定了卡密的账号，直接用卡密质保（不检测，适合已知掉车时快速操作）</p>
+      <button id="checkDrop" onclick="checkDrop()">实时检测所有账号状态</button>
+      <button id="warrantyDropped" class="secondary" onclick="warrantyDropped()">掉车账号一键质保</button>
+    </div>
+
+    <div class="panel">
+      <h2>批量注册 Free 账号</h2>
+      <p style="margin: 0 0 12px; color: #8892b0; font-size: 13px;">在终端运行: <code>python manage.py batch-register 14</code> 或加 <code>--no-proxy</code> 直连（间隔 3–5 分钟）。支持 <code>--resume</code> 断点续传。</p>
+    </div>
+
+    <div class="panel">
+      <h2>剩余额度 & 绑定信息同步</h2>
+      <p style="margin: 0 0 12px; color: #8892b0; font-size: 13px;">同步绑定信息：程序自动对池中有卡密的账号执行激活查询，补全绑定日期/剩余天数，到期自动解绑。刷新或加载时自动触发。</p>
+      <div class="form-row" style="margin-bottom:16px">
+        <button id="syncBinding" onclick="syncBinding()">同步绑定信息</button>
+        <button id="checkQuota" class="secondary" onclick="checkQuota()">剩余额度检测</button>
+        <span style="color:#8892b0;font-size:13px;align-self:center">（config 可配 quota_source_url）</span>
+      </div>
+      <div id="quotaResult" style="margin-bottom:16px;font-size:13px;color:#8892b0"></div>
+    </div>
+
+    <div class="panel">
+      <h2>账户池详情</h2>
+      <p style="margin: 0 0 12px; color: #8892b0; font-size: 13px;">已激活但显示「-」卡密：卡密激活满 25 天后平台不再展示，或为早期添加时未录入。有卡密的账号掉车后可自动质保。</p>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="secondary" onclick="refresh()">刷新</button>
+        <span style="color:#8892b0;font-size:13px">Plan 筛选：</span>
+        <button class="secondary" id="filterAll" onclick="setPlanFilter('all')">全部</button>
+        <button class="secondary" id="filterTeam" onclick="setPlanFilter('team')">Team</button>
+        <button class="secondary" id="filterFree" onclick="setPlanFilter('free')">Free</button>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#8892b0;cursor:pointer">
+          <input type="checkbox" id="collapseFree" onchange="applyCollapseFree()">
+          折叠 Free 账号
+        </label>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>邮箱</th>
+              <th>密码</th>
+              <th>状态</th>
+              <th>Plan</th>
+              <th>卡密</th>
+              <th>绑定日期</th>
+              <th>剩余天数</th>
+              <th>5h额度</th>
+              <th>周额度</th>
+              <th>额度恢复</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '';
+    async function fetchPool() {
+      const r = await fetch(API + '/api/pool');
+      if (!r.ok) throw new Error('获取失败');
+      return r.json();
+    }
+    function showToast(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = 'toast ' + type;
+      el.textContent = msg;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+    function maskPwd(p) {
+      if (!p || p.length < 4) return '***';
+      return p.slice(0,2) + '***' + p.slice(-2);
+    }
+    function statusClass(s) {
+      if (s === '已激活') return 'status-ok';
+      if (s === '代激活') return 'status-pending';
+      return 'status-error';
+    }
+    function fmtQuotaReset(ts) {
+      if (!ts) return '-';
+      const now = Date.now() / 1000;
+      if (ts <= now) return '<span style="color:#2ecc71">已恢复</span>';
+      const diffH = (ts - now) / 3600;
+      if (diffH < 1) {
+        const diffM = Math.ceil((ts - now) / 60);
+        return `<span style="color:#f1c40f">⏰ ${diffM}分后</span>`;
+      }
+      const h = Math.floor(diffH);
+      const m = Math.round((diffH - h) * 60);
+      const hhmm = new Date(ts * 1000).toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+      return `<span style="color:#f1c40f">⏰ ${h}h${m > 0 ? m+'m' : ''} (${hhmm})</span>`;
+    }
+    let _fastMode = false;
+    async function loadFastMode() {
+      try {
+        const r = await fetch('/api/fast-mode');
+        const d = await r.json();
+        _fastMode = d.fast_mode;
+        updateFastModeBtn();
+      } catch {}
+    }
+    function updateFastModeBtn() {
+      const btn = document.getElementById('fastModeBtn');
+      btn.textContent = _fastMode ? 'ON' : 'OFF';
+      btn.style.background = _fastMode ? '#e67e22' : '#2a2a4a';
+      btn.style.color = _fastMode ? '#fff' : '#8892b0';
+      btn.style.border = _fastMode ? '1px solid #e67e22' : '1px solid #2a2a4a';
+    }
+    async function toggleFastMode() {
+      const btn = document.getElementById('fastModeBtn');
+      btn.disabled = true;
+      btn.textContent = '…';
+      try {
+        const r = await fetch('/api/fast-mode', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ enabled: !_fastMode }) });
+        const d = await r.json();
+        _fastMode = d.fast_mode;
+        updateFastModeBtn();
+        showToast(_fastMode ? '⚡ Fast Mode ON — 1.5×速度，2×额度消耗' : '🐢 Fast Mode OFF — 标准速度，省额度');
+      } catch { showToast('切换失败', 'error'); }
+      finally { btn.disabled = false; }
+    }
+    loadFastMode();
+
+    let _planFilter = 'all';
+    let _collapseFree = false;
+    function setPlanFilter(f) {
+      _planFilter = f;
+      document.getElementById('filterAll').style.background = f === 'all' ? '#00d9ff' : '#2a2a4a';
+      document.getElementById('filterTeam').style.background = f === 'team' ? '#00d9ff' : '#2a2a4a';
+      document.getElementById('filterFree').style.background = f === 'free' ? '#00d9ff' : '#2a2a4a';
+      if (window._lastPoolData) renderTable(window._lastPoolData);
+    }
+    function applyCollapseFree() {
+      _collapseFree = document.getElementById('collapseFree').checked;
+      if (window._lastPoolData) renderTable(window._lastPoolData);
+    }
+    function isTeamPlan(p) {
+      return ['team','business','enterprise','pro','plus','gopro','edu'].includes((p.plan || '').toLowerCase());
+    }
+    function isFreePlan(p) {
+      return (p.plan || '').toLowerCase() === 'free';
+    }
+
+    function render(data) {
+      const { pool, summary, expiringList, apiKey, apiUrl } = data;
+      if (apiKey) {
+        document.getElementById('apiKeyDisplay').textContent = apiKey;
+      }
+      if (apiUrl) {
+        document.getElementById('apiUrlDisplay').textContent = 'API: ' + apiUrl;
+      }
+      document.getElementById('total').textContent = summary.total;
+      document.getElementById('active').textContent = summary.active;
+      document.getElementById('teamCount').textContent = summary.team ?? 0;
+      document.getElementById('freeCount').textContent = summary.free ?? 0;
+      document.getElementById('pending').textContent = summary.pending;
+      document.getElementById('dropped').textContent = summary.dropped;
+      document.getElementById('expiring').textContent = summary.expiring;
+
+      // 到期提示
+      const warnEl = document.getElementById('expiry-warn');
+      if (expiringList.length) {
+        warnEl.innerHTML = '<div class="warn"><div class="warn-title">⚠️ 以下账号绑定的卡密将在 7 天内到期（25 天质保期）</div>' +
+          expiringList.map(a => `${a.email}（剩余 ${a.days_remaining} 天）`).join('、') + '</div>';
+        warnEl.style.display = 'block';
+      } else {
+        warnEl.innerHTML = '';
+        warnEl.style.display = 'none';
+      }
+
+      window._poolData = pool;
+      window._lastPoolData = pool;
+      document.getElementById('filterAll').style.background = _planFilter === 'all' ? '#00d9ff' : '#2a2a4a';
+      document.getElementById('filterTeam').style.background = _planFilter === 'team' ? '#00d9ff' : '#2a2a4a';
+      document.getElementById('filterFree').style.background = _planFilter === 'free' ? '#00d9ff' : '#2a2a4a';
+      document.getElementById('collapseFree').checked = _collapseFree;
+      renderTable(pool);
+    }
+    function renderTable(pool) {
+      let displayPool = pool;
+      if (_planFilter === 'team') displayPool = pool.filter(isTeamPlan);
+      else if (_planFilter === 'free') displayPool = pool.filter(isFreePlan);
+
+      let freeRows = [];
+      let otherRows = [];
+      if (_collapseFree && _planFilter === 'all') {
+        freeRows = displayPool.filter(isFreePlan);
+        otherRows = displayPool.filter(a => !isFreePlan(a));
+      } else {
+        otherRows = displayPool;
+      }
+
+      const STATUS_MAP = { active: '已激活', pending_invite: '代激活', error: '掉车', '掉车': '掉车', '封号': '封号' };
+      const toTr = (a, origIdx) => {
+        const statusText = STATUS_MAP[a.status] || a.status || '?';
+        const planText = a.plan || '-';
+        const planColor = isTeamPlan(a) ? '#00d9ff' : (planText === 'free' ? '#e74c3c' : '#666');
+        const days = a.days_remaining;
+        const daysHtml = days != null ? `<span class="${days <= 7 ? 'days-warn' : 'days-ok'}">${days}天</span>` : '<span style="color:#666">-</span>';
+        const statusDisplay = statusText === '封号' ? '<span class="status-error" title="登录失败">🚫 封号</span>' : `<span class="${statusClass(statusText)}">${statusText}</span>`;
+        return `<tr>
+          <td>${escapeHtml(a.email)}</td>
+          <td><code>${maskPwd(a.password)}</code><button class="copy-btn" onclick="copyPass(${origIdx})">复制</button></td>
+          <td>${statusDisplay}</td>
+          <td style="color:${planColor}">${planText}</td>
+          <td>${escapeHtml(a.card_key ? a.card_key.slice(0,14)+'…' : '-')}</td>
+          <td>${escapeHtml(a.card_bind_date || '-')}</td>
+          <td>${daysHtml}</td>
+          <td>${a.quota_5h ?? '-'}</td>
+          <td>${a.quota_weekly ?? '-'}</td>
+          <td>${fmtQuotaReset(a.quota_reset_at)}</td>
+        </tr>`;
+      };
+
+      let rows = otherRows.map(a => toTr(a, pool.findIndex(p => p.email === a.email)));
+      if (_collapseFree && _planFilter === 'all' && freeRows.length > 0) {
+        rows.push(`<tr><td colspan="10" style="color:#8892b0;padding:12px">▼ 已折叠 ${freeRows.length} 个 Free 账号</td></tr>`);
+      }
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = rows.join('') || '<tr><td colspan="10" style="color:#666">暂无账户</td></tr>';
+    }
+    function escapeHtml(s) {
+      if (!s) return '';
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+    function copy(text) {
+      navigator.clipboard.writeText(text).then(() => showToast('已复制')).catch(() => showToast('复制失败','error'));
+    }
+    function copyPass(i) {
+      const p = window._poolData && window._poolData[i] && window._poolData[i].password;
+      copy(p || '');
+    }
+    async function refresh() {
+      try {
+        const data = await fetchPool();
+        render(data);
+      } catch (e) {
+        showToast('加载失败: ' + e.message, 'error');
+      }
+    }
+    async function runPipeline() {
+      const cardKey = document.getElementById('cardKey').value.trim();
+      const activationUrl = document.getElementById('activationUrl').value.trim() || 'team.654301.xyz';
+      const parsed = parseCardKey(cardKey);
+      const key = parsed?.cardKey || cardKey;
+      const actUrl = parsed?.url || activationUrl;
+      if (!key) {
+        showToast('请输入有效卡密', 'error');
+        return;
+      }
+      const btn = document.getElementById('runPipeline');
+      btn.disabled = true;
+      btn.textContent = '执行中…';
+      document.body.classList.add('loading');
+      try {
+        const r = await fetch(API + '/api/run-pipeline', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cardKey: key, activationUrl: actUrl }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok && j.ok) {
+          showToast('流水线完成');
+          document.getElementById('cardKey').value = '';
+          refresh();
+        } else {
+          showToast(j.error || '执行失败', 'error');
+        }
+      } catch (e) {
+        showToast('请求失败: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '执行流水线';
+        document.body.classList.remove('loading');
+      }
+    }
+    function parseCardKey(text) {
+      const lines = (text || '').split('\n').map(l => l.trim()).filter(Boolean);
+      let cardKey = '', url = '';
+      for (const line of lines) {
+        const km = line.match(/卡密[：:]\s*([A-Z0-9]+-[A-Z0-9]+)/i);
+        if (km) { cardKey = km[1]; continue; }
+        const um = line.match(/激活网址[：:]\s*(\S+)/);
+        if (um) { url = um[1].replace(/^https?:\/\//, ''); continue; }
+        if (!cardKey && /^[A-Z0-9]+-[A-Z0-9]{6,}$/.test(line)) cardKey = line;
+      }
+      if (cardKey) return { cardKey, url: url || 'team.654301.xyz' };
+      return null;
+    }
+    async function checkDrop() {
+      const btn = document.getElementById('checkDrop');
+      btn.disabled = true;
+      btn.textContent = '检测中…（gpt-5.4 xhigh）';
+      document.body.classList.add('loading');
+      try {
+        const r = await fetch(API + '/api/check-drop', { method: 'POST' });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok && j.ok) {
+          showToast(j.msg || '检测完成');
+          refresh();
+        } else {
+          showToast(j.error || '检测失败，请确认反代已启动', 'error');
+        }
+      } catch (e) {
+        showToast('请求失败: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '实时检测所有账号状态';
+        document.body.classList.remove('loading');
+      }
+    }
+    function copyApiKey() {
+      const el = document.getElementById('apiKeyDisplay');
+      const key = el ? el.textContent : '';
+      navigator.clipboard.writeText(key).then(() => showToast('API Key 已复制')).catch(() => showToast('复制失败','error'));
+    }
+    async function syncBinding() {
+      const btn = document.getElementById('syncBinding');
+      btn.disabled = true;
+      btn.textContent = '同步中…';
+      try {
+        await fetch(API + '/api/sync-binding', { method: 'POST' });
+        showToast('同步已启动，请稍候刷新');
+        setTimeout(refresh, 8000);
+      } catch (e) { showToast('请求失败','error'); }
+      finally { btn.disabled = false; btn.textContent = '同步绑定信息'; }
+    }
+    async function checkQuota() {
+      const btn = document.getElementById('checkQuota');
+      btn.disabled = true;
+      btn.textContent = '检测中…';
+      const el = document.getElementById('quotaResult');
+      el.textContent = '正在查询各账号额度，请稍候…';
+      el.style.color = '#8892b0';
+      try {
+        const r = await fetch(API + '/api/check-quota', { method: 'POST' });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok && j.ok) {
+          const accounts = j.accounts || [];
+          if (!accounts.length) {
+            el.textContent = '无账号数据';
+          } else {
+            const rows = accounts.map(a => {
+              const q5 = a.quota_5h != null ? a.quota_5h : '–';
+              const qw = a.quota_weekly != null ? a.quota_weekly : '–';
+              const plan = a.plan ? ` [${a.plan}]` : '';
+              const short = a.email.split('@')[0];
+              return `${short}${plan}  5h: ${q5}  周: ${qw}`;
+            }).join('\n');
+            el.textContent = rows;
+          }
+          el.style.color = '#00d9ff';
+          showToast('额度检测完成，结果已写入 pool');
+          refresh();
+        } else {
+          el.textContent = j.error || '检测失败';
+          el.style.color = '#e74c3c';
+          showToast(j.error || '额度检测失败', 'error');
+        }
+      } catch (e) {
+        el.textContent = '请求失败: ' + e.message;
+        el.style.color = '#e74c3c';
+        showToast('请求失败: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '剩余额度检测';
+      }
+    }
+    async function warrantyDropped() {
+      const btn = document.getElementById('warrantyDropped');
+      btn.disabled = true;
+      btn.textContent = '质保中…';
+      document.body.classList.add('loading');
+      try {
+        const r = await fetch(API + '/api/warranty-dropped', { method: 'POST' });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok && j.ok) {
+          showToast(j.msg || '质保完成');
+          refresh();
+        } else {
+          showToast(j.error || '质保失败', 'error');
+        }
+      } catch (e) {
+        showToast('请求失败: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '掉车账号一键质保';
+        document.body.classList.remove('loading');
+      }
+    }
+    refresh();
+    setTimeout(() => fetch(API + '/api/sync-binding', { method: 'POST' }).catch(() => {}), 2000);
+    setInterval(refresh, 30000);
+  </script>
+</body>
+</html>

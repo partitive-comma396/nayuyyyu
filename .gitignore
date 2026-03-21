@@ -1,0 +1,12 @@
+node_modules/
+__pycache__/
+*.pyc
+.env
+accounts/*.json
+!accounts/.gitkeep
+.DS_Store
+*.log
+automation/config.json
+automation/proxy-cache.json
+accounts.txt
+automation/accounts.txt

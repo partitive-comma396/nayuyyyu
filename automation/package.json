@@ -1,0 +1,19 @@
+{
+  "name": "codex-api-manager-automation",
+  "version": "1.0.0",
+  "description": "ChatGPT account registration, token extraction, and activation automation",
+  "type": "module",
+  "scripts": {
+    "install-browsers": "npx playwright install firefox",
+    "register": "node run-register.js",
+    "add-account": "node add_account.js",
+    "activate": "node activate_account.js",
+    "batch-register": "node batch_register.js"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.2.0",
+    "cheerio": "^1.0.0",
+    "playwright": "^1.49.0",
+    "uuid": "^11.0.3"
+  }
+}

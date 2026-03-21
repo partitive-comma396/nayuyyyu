@@ -1,7 +1,7 @@
 {
   "name": "codex-api-manager",
   "version": "1.0.0",
-  "description": "复制卡密，自动注册+激活+反代API",
+  "description": "nayuyyyu：Codex API 管理器 — ChatGPT Team 额度聚合为 OpenAI 兼容 API，含控制面板与账号自动化流水线",
   "type": "module",
   "main": "app.js",
   "scripts": {

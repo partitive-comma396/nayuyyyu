@@ -36,10 +36,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-username/Codex2API"
-Documentation = "https://github.com/your-username/Codex2API#readme"
-Repository = "https://github.com/your-username/Codex2API"
-Issues = "https://github.com/your-username/Codex2API/issues"
+# 公开仓库名常为 nayuyyyu；实际克隆地址以你在 GitHub 上打开的仓库为准（所有者名因 fork/转移可能不同）
+Homepage = "https://github.com"
 
 [project.optional-dependencies]
 dev = [

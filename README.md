@@ -1,8 +1,24 @@
-# Codex API Manager
+# Codex API Manager（nayuyyyu）
 
-把 ChatGPT Team 账户的 Codex 额度，反向代理成标准 OpenAI 兼容 API。
+## 项目简介
 
-多账号轮转、额度叠加、Token 自动续期。对外暴露一个 API Key，支持 **Codex 桌面版**、CLI、OpenClaw 以及任何兼容 OpenAI API 的客户端。
+**nayuyyyu** 是一套在本地运行的 **Codex API 管理器**：把 ChatGPT Team 账号下的 Codex 用量，通过反向代理聚合成 **OpenAI 兼容的 HTTP API**（`/v1`），让你用熟悉的客户端（Codex 桌面版、CLI、OpenClaw、任意 OpenAI SDK）统一调用。
+
+**核心能力概览**
+
+| 能力 | 说明 |
+|------|------|
+| OpenAI 兼容 API | 提供 `/v1/responses`、`/v1/chat/completions` 等，Base URL 指向本地反代即可 |
+| 多账号轮转 | 多账号 round-robin，额度与容错叠加 |
+| Web 控制面板 | 浏览器里管理账号池、卡密、额度检测、API Key |
+| 自动化流水线 | Playwright 驱动注册、激活、提 Token、质保等（见 `automation/`） |
+| Token 维护 | 定时检查并续期，减少手工登录 |
+
+**技术栈**：Node.js（控制面板与调度）、Python FastAPI（反代）、Playwright（浏览器自动化）。适用于 **macOS**，需本机安装 Node、Python 3.11+ 等（见下文环境要求）。
+
+**仓库与克隆**：若在 GitHub 上浏览本仓库，请使用页面上的 **Code** 按钮复制克隆地址；不同 fork/镜像下的「所有者/组织名」可能不同，以你实际打开的仓库为准。若你已在 GitHub 上转移仓库或改用 fork，可在本机执行 `git remote set-url origin <新地址>`，使本地 `git remote -v` 与目标仓库一致。
+
+对外只需一个 API Key，即可配合 **Codex 桌面版**、CLI、OpenClaw 及任意 OpenAI 兼容客户端使用。
 
 ---
 

@@ -1,5 +1,11 @@
 # Codex API Manager（nayuyyyu）
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-nayuyyyu-24292f?logo=github)](https://github.com/xr24097/nayuyyyu)
+[![Public](https://img.shields.io/badge/visibility-public-success)](https://github.com/xr24097/nayuyyyu)
+[![macOS](https://img.shields.io/badge/platform-macOS-000000?logo=apple)](https://github.com/xr24097/nayuyyyu)
+
+> **English:** Self-hosted **OpenAI-compatible** HTTP API (`/v1`) that aggregates **ChatGPT Team / Codex** usage with **multi-account rotation**, a **FastAPI** reverse proxy, **Node** dashboard, and **Playwright** automation. Intended for **macOS**.
+
 ## 项目简介
 
 **nayuyyyu** 是一套在本地运行的 **Codex API 管理器**：把 ChatGPT Team 账号下的 Codex 用量，通过反向代理聚合成 **OpenAI 兼容的 HTTP API**（`/v1`），让你用熟悉的客户端（Codex 桌面版、CLI、OpenClaw、任意 OpenAI SDK）统一调用。
@@ -19,6 +25,21 @@
 **仓库与克隆**：若在 GitHub 上浏览本仓库，请使用页面上的 **Code** 按钮复制克隆地址；不同 fork/镜像下的「所有者/组织名」可能不同，以你实际打开的仓库为准。若你已在 GitHub 上转移仓库或改用 fork，可在本机执行 `git remote set-url origin <新地址>`，使本地 `git remote -v` 与目标仓库一致。
 
 对外只需一个 API Key，即可配合 **Codex 桌面版**、CLI、OpenClaw 及任意 OpenAI 兼容客户端使用。
+
+---
+
+## 克隆本仓库
+
+任何人都可以克隆公开仓库（无需额外权限）：
+
+```bash
+git clone https://github.com/xr24097/nayuyyyu.git
+cd nayuyyyu
+```
+
+若你使用自己的 **fork**，把地址里的用户名改成你的 GitHub 用户名即可。克隆完成后继续阅读下方「快速开始」安装依赖并启动。
+
+在 GitHub 网页上也可以打开本仓库主页，点击绿色 **Code** 按钮复制 HTTPS / SSH 地址。
 
 ---
 

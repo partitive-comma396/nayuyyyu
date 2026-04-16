@@ -4,10 +4,10 @@
   "description": "nayuyyyu：Codex API 管理器 — ChatGPT Team 额度聚合为 OpenAI 兼容 API，含控制面板与账号自动化流水线",
   "repository": {
     "type": "git",
-    "url": "https://github.com/xr24097/nayuyyyu.git"
+    "url": "https://github.com/nayuyyyu/nayuyyyu.git"
   },
   "bugs": {
-    "url": "https://github.com/xr24097/nayuyyyu/issues"
+    "url": "https://github.com/nayuyyyu/nayuyyyu/issues"
   },
   "type": "module",
   "main": "app.js",

